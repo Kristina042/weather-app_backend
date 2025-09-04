@@ -33,18 +33,11 @@ export type UvIndexDto = {
     value: number
 }
 
-export type ForcastDto = {
-    city: string,
-    country: string,
-    timezone: number,
-    list: ForecastEntry[]
-}
-
 export type ForecastEntry = {
-    date: number,
+    hour: string,
     weather: {
         main: string,               //clouds
-        description: string,        //brocken clouds
+        description: string,        //broken clouds
     }
     temp: {
         temp: number,
@@ -58,12 +51,34 @@ export type ForecastEntry = {
         gust ?:number
     },
     sun: {
-        sunrise: number,        // UNIX timestamp
-        sunset: number          // UNIX timestamp
+        sunrise: string,
+        sunset: string
     },
     clouds: number,             //%
     pressure: number,           //hPa
     humidity: number,           //%
     sea_level?: number,         // hPa, optional
     grnd_level?: number         // hPa, optional
+}
+
+export type ForecastDto = {
+  city: string;
+  country: string;
+  timezone: number;
+  days: DayForecast[];
+};
+
+export type DayForecast = {
+  date: string;       // "04/09"
+  dayOfWeek: string;  // "Thursday"
+  data: ForecastEntry[];
+}
+
+export type ShortForecastDto = {
+    city: string;
+    days: {
+        dayOfWeek: string;
+        temp_max: number;
+        temp_min: number;
+    }[]
 }

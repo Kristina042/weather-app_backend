@@ -11,13 +11,19 @@ export class WeatherController {
         return this.weatherService.getCurrentWeather(city);
     }
 
-    @Get('forecast')
+    @Get('detailedForecast')
     async getForecast(@Query('city') city: string) {
         return this.weatherService.get5DayForecast(city)
     }
 
     @Get('uv')
-    getUVIndex(@Query('lat') lat: string, @Query('lon') lon: string) {
+    async getUVIndex(@Query('lat') lat: string, @Query('lon') lon: string) {
         return this.weatherService.getUVIndex(Number(lat), Number(lon));
     }
+
+    @Get('shortForecast')
+    async getShortForecast() {
+        return this.weatherService.shortForecast
+    }
+
 }

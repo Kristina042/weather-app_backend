@@ -41,10 +41,10 @@ export type ForcastDto = {
 }
 
 export type ForecastEntry = {
-    date: number,
+    hour: string,
     weather: {
         main: string,               //clouds
-        description: string,        //brocken clouds
+        description: string,        //broken clouds
     }
     temp: {
         temp: number,
@@ -58,8 +58,8 @@ export type ForecastEntry = {
         gust ?:number
     },
     sun: {
-        sunrise: number,        // UNIX timestamp
-        sunset: number          // UNIX timestamp
+        sunrise: string,
+        sunset: string
     },
     clouds: number,             //%
     pressure: number,           //hPa
@@ -67,3 +67,16 @@ export type ForecastEntry = {
     sea_level?: number,         // hPa, optional
     grnd_level?: number         // hPa, optional
 }
+
+export type BackendForecastDto = {
+  city: string;
+  country: string;
+  timezone: number;
+  days: DayForecast[];
+};
+
+export type DayForecast = {
+  date: string;       // "04/09"
+  dayOfWeek: string;  // "Thursday"
+  data: ForecastEntry[];
+};

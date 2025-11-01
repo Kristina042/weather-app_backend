@@ -88,39 +88,39 @@ export class WeatherService {
                 })
 
                 return {
-                weather: {
-                    main: item.weather[0].main,
-                    description: item.weather[0].description,
-                },
-                temp: {
-                    temp: item.main.temp,
-                    feels_like: item.main.feels_like,
-                    temp_min: item.main.temp_min,
-                    temp_max: item.main.temp_max,
-                },
-                wind: {
-                    speed: item.wind.speed,
-                    deg: item.wind.deg,
-                    gust: item.wind.gust,
-                },
-                clouds: item.clouds.all,
-                pressure: item.main.pressure,
-                humidity: item.main.humidity,
-                sea_level: item.main.sea_level,
-                grnd_level: item.main.grnd_level,
-                hour: militaryTime,
-                sun: {
-                    sunrise: new Date(data.city.sunrise * 1000).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                    }),
-                    sunset: new Date(data.city.sunset * 1000).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                    }),
-                },
+                    weather: {
+                        main: item.weather[0].main,
+                        description: item.weather[0].description,
+                    },
+                    temp: {
+                        temp: item.main.temp,
+                        feels_like: item.main.feels_like,
+                        temp_min: item.main.temp_min,
+                        temp_max: item.main.temp_max,
+                    },
+                    wind: {
+                        speed: item.wind.speed,
+                        deg: item.wind.deg,
+                        gust: item.wind.gust,
+                    },
+                    clouds: item.clouds.all,
+                    pressure: item.main.pressure,
+                    humidity: item.main.humidity,
+                    sea_level: item.main.sea_level,
+                    grnd_level: item.main.grnd_level,
+                    hour: militaryTime,
+                    sun: {
+                        sunrise: new Date(data.city.sunrise * 1000).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                        }),
+                        sunset: new Date(data.city.sunset * 1000).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                        }),
+                    },
                 }
             }),
             }
@@ -142,6 +142,10 @@ export class WeatherService {
 
         const daysOfWeek = longForecast.days.map(item => item.dayOfWeek)
 
+        const descriptions = longForecast.days.map(day =>
+            day.data[4].weather.description
+        )
+
         const minTemps = longForecast.days.map(day =>
             Math.min(
                 ...day.data.map(item => item.temp.temp_min)
@@ -160,7 +164,8 @@ export class WeatherService {
             shortForecastDays[i] = {
                 dayOfWeek: daysOfWeek[i],
                 temp_min: minTemps[i],
-                temp_max: maxTemps[i]
+                temp_max: maxTemps[i],
+                description: descriptions[i]
             }
         }
 

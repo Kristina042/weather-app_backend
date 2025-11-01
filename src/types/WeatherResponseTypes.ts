@@ -77,6 +77,7 @@ export type DayForecast = {
 export type ShortForecastDto = {
     city: string;
     days: {
+        description: string;
         dayOfWeek: string;
         temp_max: number;
         temp_min: number;

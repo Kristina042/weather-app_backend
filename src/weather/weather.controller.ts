@@ -22,8 +22,8 @@ export class WeatherController {
     }
 
     @Get('shortForecast')
-    async getShortForecast() {
-        return this.weatherService.shortForecast
+    async getShortForecast(@Query('city') city: string) {
+        return this.weatherService.getShortForecast(city)
     }
 
 }

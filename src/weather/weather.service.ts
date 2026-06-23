@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { OpenWeatherCurrentResponse, OpenWeatherForecastResponse, OpenWeatherUvResponse } from 'src/types/OpenWeatherTypes';
-import { CurrentWeatherDto, ShortForecastDto, UvIndexDto } from 'src/types/WeatherResponseTypes';
+import { ShortForecastDto, UvIndexDto } from 'src/types/WeatherResponseTypes';
 import { ForecastDto } from 'src/types/WeatherResponseTypes';
+import { mapCurrentWeather, mapToShortForecast } from './mappers/weather.mapper';
 
 @Injectable()
 export class WeatherService {
@@ -12,44 +13,20 @@ export class WeatherService {
 
     constructor(private readonly httpService: HttpService) {}
 
-    shortForecast: ShortForecastDto | null = null
+    //shortForecast: ShortForecastDto | null = null
+
+
+    async getShortForecast(city: string): Promise<ShortForecastDto> {
+        const forecast = await this.get5DayForecast(city);
+        return mapToShortForecast(forecast)
+    }
 
     async getCurrentWeather(city: string) {
         const url = `${this.baseUrl}/weather?q=${city}&appid=${this.apiKey}&units=metric`
         const response = await firstValueFrom(this.httpService.get<OpenWeatherCurrentResponse>(url))
         const data = response.data
 
-        const mappedResponse: CurrentWeatherDto = {
-            city: data.name,
-            country: data.sys.country,
-            timestamp: data.dt,
-            weather: {
-                main: data.weather[0].main,
-                description:  data.weather[0].description
-            },
-            temp: {
-                temp: data.main.temp,
-                feels_like: data.main.feels_like,
-                temp_min: data.main.temp_min,
-                temp_max: data.main.temp_max,
-            },
-            wind: {
-                speed: data.wind.speed,
-                deg: data.wind.deg,
-                gust: data.wind?.gust
-            },
-            sun: {
-                sunrise: data.sys.sunrise,
-                sunset: data.sys.sunset
-            },
-            clouds:  data.clouds.all,
-            pressure: data.main.pressure,
-            humidity: data.main.humidity,
-            sea_level: data.main.sea_level,
-            grnd_level: data.main.grnd_level
-        }
-
-        return mappedResponse;
+        return mapCurrentWeather(data);
     }
 
     async get5DayForecast(city: string) {
@@ -132,51 +109,8 @@ export class WeatherService {
             timezone: data.city.timezone,
             days,
         }
-
-        this.shortForecast =  this.mapToShortForecast(mappedResponse)
-
         return mappedResponse
     }
-
-    mapToShortForecast(longForecast: ForecastDto) {
-
-        const daysOfWeek = longForecast.days.map(item => item.dayOfWeek)
-
-        const descriptions = longForecast.days.map(day =>
-            day.data[4].weather.description
-        )
-
-        const minTemps = longForecast.days.map(day =>
-            Math.min(
-                ...day.data.map(item => item.temp.temp_min)
-            )
-        )
-
-        const maxTemps = longForecast.days.map(day =>
-            Math.max(
-                ...day.data.map(item => item.temp.temp_max)
-            )
-        )
-
-        const shortForecastDays = new Array(5)
-
-        for (let i = 0; i < daysOfWeek.length; i++) {
-            shortForecastDays[i] = {
-                dayOfWeek: daysOfWeek[i],
-                temp_min: minTemps[i],
-                temp_max: maxTemps[i],
-                description: descriptions[i]
-            }
-        }
-
-        const shortForecast: ShortForecastDto = {
-            city: longForecast.city,
-            days: shortForecastDays
-        }
-
-        return shortForecast
-    }
-
 
     async getUVIndex(lat: number, lon: number) {
         const url = `${this.baseUrl}/uvi?lat=${lat}&lon=${lon}&appid=${this.apiKey}`;
@@ -189,5 +123,4 @@ export class WeatherService {
         }
         return mappedResponse;
     }
-
 }

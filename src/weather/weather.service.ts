@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { OpenWeatherCurrentResponse, OpenWeatherForecastResponse, OpenWeatherUvResponse } from 'src/types/OpenWeatherTypes';
 import { ShortForecastDto, UvIndexDto } from 'src/types/WeatherResponseTypes';
 import { ForecastDto } from 'src/types/WeatherResponseTypes';
-import { mapCurrentWeather, mapToShortForecast } from './mappers/weather.mapper';
+import { mapCurrentWeather, mapto5Dayforecast, mapToShortForecast, mapUVIndex } from './mappers/weather.mapper';
 
 @Injectable()
 export class WeatherService {
@@ -12,9 +12,6 @@ export class WeatherService {
     private readonly baseUrl = 'https://api.openweathermap.org/data/2.5'
 
     constructor(private readonly httpService: HttpService) {}
-
-    //shortForecast: ShortForecastDto | null = null
-
 
     async getShortForecast(city: string): Promise<ShortForecastDto> {
         const forecast = await this.get5DayForecast(city);
@@ -31,85 +28,10 @@ export class WeatherService {
 
     async get5DayForecast(city: string) {
         const url = `${this.baseUrl}/forecast?q=${city}&appid=${this.apiKey}&units=metric`;
-        const response = await firstValueFrom(
-            this.httpService.get<OpenWeatherForecastResponse>(url)
-        );
-
+        const response = await firstValueFrom(this.httpService.get<OpenWeatherForecastResponse>(url));
         const data = response.data;
-        const chunkSize = 8 // 8 entries per day
-        const totalDays = 5
-        const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
-        const days = Array.from({ length: totalDays }, (_, dayIndex) => {
-            const start = dayIndex * chunkSize
-            const end = start + chunkSize
-            const entries = data.list.slice(start, end)
-
-            const firstDate = new Date(entries[0].dt * 1000)
-
-            const formattedDate = firstDate.toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            });
-
-            const dayOfWeek = daysOfWeek[firstDate.getDay()];
-
-            return {
-            date: formattedDate,
-            dayOfWeek,
-            data: entries.map((item) => {
-                const militaryTime = new Date(item.dt * 1000).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-                })
-
-                return {
-                    weather: {
-                        main: item.weather[0].main,
-                        description: item.weather[0].description,
-                    },
-                    temp: {
-                        temp: item.main.temp,
-                        feels_like: item.main.feels_like,
-                        temp_min: item.main.temp_min,
-                        temp_max: item.main.temp_max,
-                    },
-                    wind: {
-                        speed: item.wind.speed,
-                        deg: item.wind.deg,
-                        gust: item.wind.gust,
-                    },
-                    clouds: item.clouds.all,
-                    pressure: item.main.pressure,
-                    humidity: item.main.humidity,
-                    sea_level: item.main.sea_level,
-                    grnd_level: item.main.grnd_level,
-                    hour: militaryTime,
-                    sun: {
-                        sunrise: new Date(data.city.sunrise * 1000).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                        }),
-                        sunset: new Date(data.city.sunset * 1000).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                        }),
-                    },
-                }
-            }),
-            }
-        })
-
-        const mappedResponse: ForecastDto = {
-            city: data.city.name,
-            country: data.city.country,
-            timezone: data.city.timezone,
-            days,
-        }
-        return mappedResponse
+        return mapto5Dayforecast(data);
     }
 
     async getUVIndex(lat: number, lon: number) {
@@ -117,10 +39,6 @@ export class WeatherService {
         const response = await firstValueFrom(this.httpService.get<OpenWeatherUvResponse>(url));
         const data = response.data
 
-        const mappedResponse: UvIndexDto = {
-            date: data.date,
-            value: data.value
-        }
-        return mappedResponse;
+        return mapUVIndex(data);
     }
 }

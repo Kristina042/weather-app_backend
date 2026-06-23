@@ -7,6 +7,9 @@ export const databaseProvider = {
     const client =
       new MongoClient(
         process.env.MONGODB_URI!,
+        {
+          tls: true
+        }
       );
 
     await client.connect();

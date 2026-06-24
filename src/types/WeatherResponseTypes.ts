@@ -1,7 +1,7 @@
 export type CurrentWeatherDto = {
     city: string,
     country: string,
-    timestamp: number,              //UNIX timestamp, frontend will map to hh:mm
+    timestamp: string,              //local time string
     weather: {
         main: string,               //clouds
         description: string,        //brocken clouds
@@ -18,8 +18,8 @@ export type CurrentWeatherDto = {
         gust ?:number
     },
     sun: {
-        sunrise: number,        // UNIX timestamp
-        sunset: number          // UNIX timestamp
+        sunrise: string,
+        sunset: string
     },
     clouds: number,             //%
     pressure: number,           //hPa

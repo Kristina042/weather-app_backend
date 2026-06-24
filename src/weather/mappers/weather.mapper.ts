@@ -15,7 +15,11 @@ export const mapCurrentWeather = (data: OpenWeatherCurrentResponse) => {
   const mappedResponse: CurrentWeatherDto = {
     city: data.name,
     country: data.sys.country,
-    timestamp: data.dt,
+    timestamp: new Date(data.dt*1000).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }),
     weather: {
       main: data.weather[0].main,
       description:  data.weather[0].description
@@ -33,8 +37,16 @@ export const mapCurrentWeather = (data: OpenWeatherCurrentResponse) => {
     },
 
     sun: {
-      sunrise: data.sys.sunrise,
-      sunset: data.sys.sunset
+      sunrise: new Date(data.sys.sunrise*1000).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }),
+      sunset: new Date(data.sys.sunset*1000).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      })
     },
     clouds:  data.clouds.all,
     pressure: data.main.pressure,
